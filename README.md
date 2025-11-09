@@ -118,22 +118,77 @@ See `prisma/schema.prisma` for the full schema definition.
 ```
 better_ece_forum/
 ├── src/
-│   ├── app/              # Next.js app directory (routes, layouts)
-│   ├── components/       # React components
-│   │   └── ui/          # shadcn/ui components
-│   └── lib/             # Utility functions and configurations
-│       ├── prisma.ts    # Prisma client singleton
-│       ├── redis.ts     # Redis client configuration
-│       └── utils.ts     # General utilities
+│   ├── app/                  # Next.js app directory (routes, layouts)
+│   │   ├── api/auth/        # Authentication API routes
+│   │   │   ├── [...nextauth]/  # NextAuth.js handler
+│   │   │   └── register/    # User registration endpoint
+│   │   ├── auth/            # Authentication pages
+│   │   │   ├── signin/      # Sign in page
+│   │   │   └── signup/      # Sign up page
+│   │   ├── layout.tsx       # Root layout with AuthProvider
+│   │   └── page.tsx         # Homepage
+│   ├── components/          # React components
+│   │   └── ui/             # shadcn/ui components
+│   ├── lib/                # Utility functions and configurations
+│   │   ├── auth/           # Authentication configuration
+│   │   │   ├── config.ts   # NextAuth.js configuration
+│   │   │   └── provider.tsx # Session provider
+│   │   ├── prisma.ts       # Prisma client singleton
+│   │   ├── redis.ts        # Redis client configuration
+│   │   └── utils.ts        # General utilities
+│   ├── types/              # TypeScript type definitions
+│   └── middleware.ts       # Route protection middleware
 ├── prisma/
-│   └── schema.prisma    # Database schema
-├── public/              # Static assets
+│   └── schema.prisma       # Database schema (User, Account, Session, etc.)
+├── public/                 # Static assets
 ├── .github/
-│   └── workflows/       # GitHub Actions CI/CD
-│       └── ci.yml       # CI pipeline (lint, type-check, build)
-├── docker-compose.yml   # Local development services
-├── .env.example         # Environment variables template
-└── README.md           # This file
+│   └── workflows/          # GitHub Actions CI/CD
+│       └── ci.yml          # CI pipeline (lint, type-check, build)
+├── docker-compose.yml      # Local development services
+├── .env.example            # Environment variables template
+└── README.md              # This file
+```
+
+### Authentication
+
+The application uses **NextAuth.js v5** for authentication with:
+
+- **Credentials Provider**: Email/password authentication with bcrypt hashing
+- **OAuth Provider**: Google Sign-In
+- **JWT Sessions**: Stateless authentication
+- **Protected Routes**: Middleware-based route protection
+
+**Authentication Features:**
+- User registration with validation (email, username, password strength)
+- Secure password hashing with bcrypt
+- Session management with JWT tokens
+- OAuth integration (Google)
+- Protected routes (`/dashboard`, `/profile`, `/settings`)
+- Automatic redirect for authenticated users on auth pages
+
+**API Endpoints:**
+- `POST /api/auth/register` - User registration
+- `GET/POST /api/auth/[...nextauth]` - NextAuth.js handler (sign in, sign out, session)
+
+**Usage Example:**
+```typescript
+import { auth } from "@/lib/auth/config"
+
+// In Server Components
+const session = await auth()
+if (session?.user) {
+  console.log("User is signed in:", session.user.email)
+}
+
+// In Client Components
+import { useSession, signIn, signOut } from "next-auth/react"
+
+const { data: session } = useSession()
+if (session) {
+  await signOut()
+} else {
+  await signIn("google")
+}
 ```
 
 ### Environment Variables
@@ -151,9 +206,13 @@ REDIS_URL=redis://localhost:6379
 NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Auth (for future use)
+# Authentication
+AUTH_SECRET=your-secret-key-here-change-in-production-use-openssl-rand-base64-32
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
+
+# OAuth Providers
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 ### Troubleshooting
@@ -212,12 +271,14 @@ This repository contains comprehensive research and planning documents:
 - [x] Development environment setup
 - [x] GitHub Actions CI pipeline
 
-### 📋 Phase 1.2: Authentication (Week 2) - NEXT
-- [ ] User registration and login
-- [ ] NextAuth.js setup
-- [ ] Email verification
-- [ ] Password reset
-- [ ] OAuth integration (Google)
+### ✅ Phase 1.2: Authentication (Week 2) - COMPLETE
+- [x] User registration and login
+- [x] NextAuth.js v5 setup with JWT sessions
+- [x] Email/password authentication with bcrypt
+- [x] OAuth integration (Google)
+- [x] Protected routes with middleware
+- [x] Session management
+- [x] User authentication UI (sign in/sign up pages)
 
 ### 🚀 Phase 2: MVP Features (Weeks 3-6)
 - [ ] Post creation and management
