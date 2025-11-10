@@ -6,7 +6,9 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight"
 import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
 import Placeholder from "@tiptap/extension-placeholder"
+import Mathematics from "@tiptap/extension-mathematics"
 import { common, createLowlight } from "lowlight"
+import "katex/dist/katex.min.css"
 import { 
   Bold, 
   Italic, 
@@ -18,8 +20,10 @@ import {
   Undo,
   Redo,
   LinkIcon,
-  ImageIcon
+  ImageIcon,
+  Sigma
 } from "lucide-react"
+import { useState } from "react"
 
 const lowlight = createLowlight(common)
 
@@ -36,6 +40,9 @@ export function RichTextEditor({
   placeholder = "Write your post content...",
   editable = true 
 }: RichTextEditorProps) {
+  const [showLatexInput, setShowLatexInput] = useState(false)
+  const [latexInput, setLatexInput] = useState("")
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -55,6 +62,7 @@ export function RichTextEditor({
           class: "max-w-full h-auto rounded-lg"
         }
       }),
+      Mathematics,
       Placeholder.configure({
         placeholder,
       }),
@@ -205,6 +213,15 @@ export function RichTextEditor({
             <ImageIcon className="w-4 h-4" />
           </button>
 
+          <button
+            type="button"
+            onClick={() => setShowLatexInput(!showLatexInput)}
+            className="p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700"
+            title="Add LaTeX Math"
+          >
+            <Sigma className="w-4 h-4" />
+          </button>
+
           <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-700 mx-1" />
 
           <button
@@ -226,6 +243,60 @@ export function RichTextEditor({
           >
             <Redo className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* LaTeX Input Dialog */}
+      {showLatexInput && editable && (
+        <div className="mb-2 p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded">
+          <label className="block text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">
+            Enter LaTeX Formula (use $ for inline, $$ for block):
+          </label>
+          <input
+            type="text"
+            value={latexInput}
+            onChange={(e) => setLatexInput(e.target.value)}
+            placeholder="E.g., $$E = mc^2$$ or $a^2 + b^2 = c^2$"
+            className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 text-sm mb-2"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault()
+                if (latexInput.trim()) {
+                  editor?.commands.insertContent(latexInput)
+                  setLatexInput("")
+                  setShowLatexInput(false)
+                }
+              }
+            }}
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (latexInput.trim()) {
+                  editor?.commands.insertContent(latexInput)
+                  setLatexInput("")
+                  setShowLatexInput(false)
+                }
+              }}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+            >
+              Insert
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLatexInput("")
+                setShowLatexInput(false)
+              }}
+              className="px-3 py-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded text-sm hover:bg-zinc-300 dark:hover:bg-zinc-700"
+            >
+              Cancel
+            </button>
+          </div>
+          <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
+            Examples: $$\int_0^\infty e{`^{-x}`}dx = 1$$, $\sum_{`{i=1}^n i`} = \frac{`{n(n+1)}`}{`{2}`}$
+          </div>
         </div>
       )}
       
