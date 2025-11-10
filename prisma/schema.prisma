@@ -76,6 +76,38 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Category model
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  color       String?  // Hex color code for UI
+  icon        String?  // Icon identifier
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  posts       Post[]
+
+  @@index([slug])
+}
+
+// Tag model
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  posts       PostTag[]
+
+  @@index([slug])
+}
+
 // Post model
 model Post {
   id          String   @id @default(cuid())
@@ -91,12 +123,33 @@ model Post {
   authorId    String
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  // Category relation
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
   // Relations
   comments    Comment[]
+  tags        PostTag[]
 
   @@index([authorId])
+  @@index([categoryId])
   @@index([published])
   @@index([createdAt])
+}
+
+// Many-to-many relation between Post and Tag
+model PostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
 }
 
 // Comment model

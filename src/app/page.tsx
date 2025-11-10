@@ -87,28 +87,55 @@ export default async function Home() {
                 </ul>
               </div>
 
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                  Phase 2: Posts System ✓
+                </h3>
+                <ul className="space-y-2 text-sm text-green-800 dark:text-green-200">
+                  <li>✓ Post creation with rich text editor</li>
+                  <li>✓ Post listing and detail pages</li>
+                  <li>✓ Categories and tags support</li>
+                  <li>✓ Edit/delete posts</li>
+                  <li>✓ Draft saving</li>
+                </ul>
+              </div>
+
               <div className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
                 <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                   Coming Next
                 </h3>
                 <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <li>→ Post creation and management</li>
-                  <li>→ Comment system</li>
-                  <li>→ Categories and tags</li>
+                  <li>→ Comment system (threaded)</li>
+                  <li>→ Full-text search</li>
+                  <li>→ User profiles</li>
                 </ul>
               </div>
             </div>
 
-            {!session && (
-              <div className="pt-4">
+            <div className="pt-4 flex gap-4 justify-center">
+              <Link
+                href="/posts"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors"
+              >
+                Browse Posts
+              </Link>
+              {session && (
+                <Link
+                  href="/posts/new"
+                  className="inline-block px-6 py-3 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors"
+                >
+                  Create Post
+                </Link>
+              )}
+              {!session && (
                 <Link
                   href="/auth/signup"
-                  className="inline-block px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors"
+                  className="inline-block px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-md font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
                 >
-                  Get Started
+                  Sign Up
                 </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </main>
