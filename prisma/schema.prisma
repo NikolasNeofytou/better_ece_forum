@@ -22,6 +22,8 @@ model User {
   bio           String?
   reputation    Int       @default(0)
   role          Role      @default(USER)
+  isBanned      Boolean   @default(false)
+  bannedUntil   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -31,9 +33,13 @@ model User {
   accounts      Account[]
   sessions      Session[]
   votes         Vote[]
+  reports       Report[]
+  moderationLogs ModerationLog[]
+  bans          Ban[]
 
   @@index([email])
   @@index([username])
+  @@index([isBanned])
 }
 
 // Account model for OAuth
@@ -117,6 +123,9 @@ model Post {
   published   Boolean  @default(false)
   viewCount   Int      @default(0)
   voteCount   Int      @default(0)
+  isLocked    Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  isRemoved   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -132,11 +141,14 @@ model Post {
   comments    Comment[]
   tags        PostTag[]
   votes       Vote[]
+  reports     Report[]
 
   @@index([authorId])
   @@index([categoryId])
   @@index([published])
   @@index([createdAt])
+  @@index([isRemoved])
+  @@index([isPinned])
 }
 
 // Many-to-many relation between Post and Tag
@@ -160,6 +172,7 @@ model Comment {
   content     String   @db.Text
   voteCount   Int      @default(0)
   isAccepted  Boolean  @default(false)
+  isRemoved   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -178,12 +191,14 @@ model Comment {
 
   // Relations
   votes       Vote[]
+  reports     Report[]
 
   @@index([authorId])
   @@index([postId])
   @@index([parentId])
   @@index([createdAt])
   @@index([isAccepted])
+  @@index([isRemoved])
 }
 
 // Vote model for posts and comments
@@ -211,9 +226,79 @@ model Vote {
   @@index([commentId])
 }
 
+// Report model for content reporting
+model Report {
+  id          String   @id @default(cuid())
+  reason      String
+  description String?  @db.Text
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+
+  // Reporter
+  reporterId  String
+  reporter    User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // Reported content (either post or comment)
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  commentId   String?
+  comment     Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([reporterId])
+  @@index([postId])
+  @@index([commentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ModerationLog model for tracking moderation actions
+model ModerationLog {
+  id          String   @id @default(cuid())
+  action      String   // "REMOVE", "LOCK", "PIN", "BAN", etc.
+  reason      String?  @db.Text
+  targetType  String   // "POST", "COMMENT", "USER"
+  targetId    String
+  createdAt   DateTime @default(now())
+
+  // Moderator who performed the action
+  moderatorId String
+  moderator   User     @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+
+  @@index([moderatorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+// Ban model for user bans
+model Ban {
+  id          String   @id @default(cuid())
+  reason      String   @db.Text
+  expiresAt   DateTime?
+  isPermanent Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Banned user
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 // Enums
 enum Role {
   USER
   MODERATOR
   ADMIN
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
 }
