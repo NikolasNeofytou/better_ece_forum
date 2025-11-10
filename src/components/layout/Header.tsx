@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, Menu, X, User, LogOut, Settings, Plus } from "lucide-react"
+import { Search, Menu, X, User, LogOut, Settings, Plus, Shield } from "lucide-react"
 
 export function Header() {
   const router = useRouter()
@@ -125,6 +125,16 @@ export function Header() {
                         <Settings className="w-4 h-4" />
                         <span>Settings</span>
                       </Link>
+
+                      {(session.user.role === "MODERATOR" || session.user.role === "ADMIN") && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        >
+                          <Shield className="w-4 h-4" />
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      )}
 
                       <button
                         onClick={() => signOut()}
