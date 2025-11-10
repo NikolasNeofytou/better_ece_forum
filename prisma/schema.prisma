@@ -30,6 +30,7 @@ model User {
   comments      Comment[]
   accounts      Account[]
   sessions      Session[]
+  votes         Vote[]
 
   @@index([email])
   @@index([username])
@@ -130,6 +131,7 @@ model Post {
   // Relations
   comments    Comment[]
   tags        PostTag[]
+  votes       Vote[]
 
   @@index([authorId])
   @@index([categoryId])
@@ -173,10 +175,38 @@ model Comment {
   parent      Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
   replies     Comment[] @relation("CommentToComment")
 
+  // Relations
+  votes       Vote[]
+
   @@index([authorId])
   @@index([postId])
   @@index([parentId])
   @@index([createdAt])
+}
+
+// Vote model for posts and comments
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int      // 1 for upvote, -1 for downvote
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User who voted
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Post or Comment being voted on
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
 }
 
 // Enums

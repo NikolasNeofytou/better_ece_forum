@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { MessageSquare, Eye, TrendingUp, Edit, Trash2 } from "lucide-react"
+import { MessageSquare, Eye, Edit, Trash2 } from "lucide-react"
 import { CommentItem } from "@/components/comments/CommentItem"
 import { CommentForm } from "@/components/comments/CommentForm"
+import { VoteButtons } from "@/components/voting/VoteButtons"
 
 interface Author {
   id: string
@@ -191,7 +192,19 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
         {/* Post Header */}
         <article className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
           <div className="p-8">
-            <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex gap-6">
+              {/* Vote Buttons */}
+              <div className="flex-shrink-0">
+                <VoteButtons
+                  targetType="post"
+                  targetId={post.id}
+                  initialVoteCount={post.voteCount}
+                />
+              </div>
+
+              {/* Post Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4 mb-6">
               <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
                 {post.title}
               </h1>
@@ -260,11 +273,6 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
                   <MessageSquare className="w-4 h-4" />
                   <span>{post._count.comments} comments</span>
                 </div>
-
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>{post.voteCount} votes</span>
-                </div>
               </div>
             </div>
 
@@ -295,6 +303,8 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
               {post.updatedAt !== post.createdAt && (
                 <div>Last edited {formatDate(post.updatedAt)}</div>
               )}
+            </div>
+              </div>
             </div>
           </div>
         </article>
