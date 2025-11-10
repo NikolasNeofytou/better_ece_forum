@@ -83,6 +83,26 @@ A modern, mobile-friendly forum with:
 7. **Open your browser**
    - Navigate to [http://localhost:3000](http://localhost:3000)
 
+### Quick Start with Scripts
+
+For a faster setup, use the provided utility scripts:
+
+```bash
+# Make scripts executable (first time only)
+chmod +x scripts/*.sh
+
+# Run initial setup
+./scripts/setup.sh
+
+# Or start development quickly
+./scripts/dev.sh
+
+# Check project status anytime
+./scripts/status.sh
+```
+
+See [scripts/README.md](./scripts/README.md) for detailed documentation on all available scripts.
+
 ### Available Scripts
 
 #### Development
@@ -102,6 +122,15 @@ A modern, mobile-friendly forum with:
 - `npm run docker:up` - Start PostgreSQL and Redis containers
 - `npm run docker:down` - Stop and remove containers
 - `npm run docker:logs` - View container logs
+
+#### Utility Scripts
+- `./scripts/status.sh` - View complete project status
+- `./scripts/test.sh` - Run all tests and checks
+- `./scripts/setup.sh` - Interactive setup wizard
+- `./scripts/health-check.sh` - Check service health
+- `./scripts/dev.sh` - Quick development environment start
+
+See [scripts/README.md](./scripts/README.md) for detailed script documentation.
 
 ### Database Schema
 
