@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useSession } from "next-auth/react"
-import { MessageSquare, Edit, Trash2, Reply } from "lucide-react"
+import { MessageSquare, Edit, Trash2, Reply, Check } from "lucide-react"
 import { VoteButtons } from "@/components/voting/VoteButtons"
 
 interface Author {
@@ -17,6 +17,7 @@ interface Comment {
   id: string
   content: string
   voteCount: number
+  isAccepted?: boolean
   createdAt: string
   updatedAt: string
   author: Author
@@ -28,18 +29,22 @@ interface Comment {
 interface CommentItemProps {
   comment: Comment
   postId: string
+  postAuthorId?: string
   onReply?: (commentId: string) => void
   onEdit?: (commentId: string, content: string) => void
   onDelete?: (commentId: string) => void
+  onAcceptToggle?: (commentId: string) => void
   depth?: number
 }
 
 export function CommentItem({ 
   comment, 
-  postId, 
+  postId,
+  postAuthorId,
   onReply, 
   onEdit, 
   onDelete,
+  onAcceptToggle,
   depth = 0 
 }: CommentItemProps) {
   const { data: session } = useSession()
@@ -50,6 +55,7 @@ export function CommentItem({
   const [isLoadingReplies, setIsLoadingReplies] = useState(false)
 
   const isAuthor = session?.user?.id === comment.author.id
+  const isPostAuthor = session?.user?.id === postAuthorId
   const maxDepth = 5 // Maximum nesting depth
 
   const formatDate = (dateString: string) => {
@@ -136,6 +142,12 @@ export function CommentItem({
               <span className="text-xs text-zinc-500 dark:text-zinc-500">
                 ({comment.author.reputation})
               </span>
+              {comment.isAccepted && (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded">
+                  <Check className="w-3 h-3" />
+                  Accepted Answer
+                </span>
+              )}
               <span className="text-xs text-zinc-500 dark:text-zinc-500">
                 •
               </span>
@@ -193,6 +205,21 @@ export function CommentItem({
                 </button>
               )}
 
+              {/* Mark as Accepted Answer (only for post author on top-level comments) */}
+              {!isEditing && isPostAuthor && depth === 0 && onAcceptToggle && (
+                <button
+                  onClick={() => onAcceptToggle(comment.id)}
+                  className={`flex items-center gap-1 font-medium ${
+                    comment.isAccepted
+                      ? "text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-green-600 dark:hover:text-green-400"
+                  }`}
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{comment.isAccepted ? "Unmark" : "Mark"} as Answer</span>
+                </button>
+              )}
+
               {isAuthor && !isEditing && (
                 <>
                   <button
@@ -246,9 +273,11 @@ export function CommentItem({
               key={reply.id}
               comment={reply}
               postId={postId}
+              postAuthorId={postAuthorId}
               onReply={onReply}
               onEdit={onEdit}
               onDelete={onDelete}
+              onAcceptToggle={onAcceptToggle}
               depth={depth + 1}
             />
           ))}

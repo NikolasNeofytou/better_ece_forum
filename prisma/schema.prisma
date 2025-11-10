@@ -159,6 +159,7 @@ model Comment {
   id          String   @id @default(cuid())
   content     String   @db.Text
   voteCount   Int      @default(0)
+  isAccepted  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -182,6 +183,7 @@ model Comment {
   @@index([postId])
   @@index([parentId])
   @@index([createdAt])
+  @@index([isAccepted])
 }
 
 // Vote model for posts and comments

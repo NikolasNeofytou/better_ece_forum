@@ -36,6 +36,7 @@ interface Comment {
   id: string
   content: string
   voteCount: number
+  isAccepted?: boolean
   createdAt: string
   updatedAt: string
   author: Author
@@ -359,6 +360,7 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
                   key={comment.id}
                   comment={comment}
                   postId={post.id}
+                  postAuthorId={post.author.id}
                   onReply={(commentId) => setReplyToCommentId(commentId)}
                   onEdit={async (commentId, content) => {
                     try {
@@ -384,6 +386,22 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
                       }
                     } catch (error) {
                       console.error("Error deleting comment:", error)
+                    }
+                  }}
+                  onAcceptToggle={async (commentId) => {
+                    try {
+                      // Check current accepted state
+                      const currentComment = post.comments.find(c => c.id === commentId)
+                      const isCurrentlyAccepted = currentComment?.isAccepted
+
+                      const response = await fetch(`/api/comments/${commentId}/accept`, {
+                        method: isCurrentlyAccepted ? "DELETE" : "POST"
+                      })
+                      if (response.ok) {
+                        refreshComments()
+                      }
+                    } catch (error) {
+                      console.error("Error toggling accepted answer:", error)
                     }
                   }}
                 />
