@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { MessageSquare, Eye, TrendingUp, Edit, Trash2 } from "lucide-react"
+import { CommentItem } from "@/components/comments/CommentItem"
+import { CommentForm } from "@/components/comments/CommentForm"
 
 interface Author {
   id: string
@@ -34,6 +36,7 @@ interface Comment {
   content: string
   voteCount: number
   createdAt: string
+  updatedAt: string
   author: Author
   _count: {
     replies: number
@@ -65,6 +68,21 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null)
+
+  const refreshComments = async () => {
+    if (!post) return
+    
+    try {
+      const response = await fetch(`/api/posts/${params.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setPost(data)
+      }
+    } catch (error) {
+      console.error("Error refreshing comments:", error)
+    }
+  }
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -282,11 +300,42 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
         </article>
 
         {/* Comments Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
+        <div className="mt-8 space-y-6">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
             Comments ({post._count.comments})
           </h2>
 
+          {/* Comment Form */}
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+              Add a Comment
+            </h3>
+            <CommentForm 
+              postId={post.id} 
+              onSuccess={refreshComments}
+            />
+          </div>
+
+          {/* Reply Form (if replying to a comment) */}
+          {replyToCommentId && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+                Reply to Comment
+              </h3>
+              <CommentForm 
+                postId={post.id} 
+                parentId={replyToCommentId}
+                onSuccess={() => {
+                  refreshComments()
+                  setReplyToCommentId(null)
+                }}
+                onCancel={() => setReplyToCommentId(null)}
+                placeholder="Write your reply..."
+              />
+            </div>
+          )}
+
+          {/* Comments List */}
           {post.comments.length === 0 ? (
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-8 text-center">
               <p className="text-zinc-600 dark:text-zinc-400">
@@ -296,40 +345,38 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
           ) : (
             <div className="space-y-4">
               {post.comments.map((comment) => (
-                <div
+                <CommentItem
                   key={comment.id}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6"
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    {comment.author.image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={comment.author.image}
-                        alt={comment.author.name || "User"}
-                        className="w-10 h-10 rounded-full"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                          {comment.author.name || comment.author.username || "Anonymous"}
-                        </span>
-                        <span className="text-xs text-zinc-500 dark:text-zinc-500">
-                          {formatDate(comment.createdAt)}
-                        </span>
-                      </div>
-                      <div
-                        className="prose prose-sm prose-zinc dark:prose-invert max-w-none"
-                        dangerouslySetInnerHTML={{ __html: comment.content }}
-                      />
-                      {comment._count.replies > 0 && (
-                        <div className="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                          {comment._count.replies} {comment._count.replies === 1 ? "reply" : "replies"}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  comment={comment}
+                  postId={post.id}
+                  onReply={(commentId) => setReplyToCommentId(commentId)}
+                  onEdit={async (commentId, content) => {
+                    try {
+                      const response = await fetch(`/api/comments/${commentId}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content })
+                      })
+                      if (response.ok) {
+                        refreshComments()
+                      }
+                    } catch (error) {
+                      console.error("Error editing comment:", error)
+                    }
+                  }}
+                  onDelete={async (commentId) => {
+                    try {
+                      const response = await fetch(`/api/comments/${commentId}`, {
+                        method: "DELETE"
+                      })
+                      if (response.ok) {
+                        refreshComments()
+                      }
+                    } catch (error) {
+                      console.error("Error deleting comment:", error)
+                    }
+                  }}
+                />
               ))}
             </div>
           )}
