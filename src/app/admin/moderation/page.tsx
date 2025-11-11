@@ -28,18 +28,6 @@ export default function ModerationLogsPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin")
-    }
-  }, [status, router])
-
-  useEffect(() => {
-    if (session?.user) {
-      fetchLogs()
-    }
-  }, [session, fetchLogs])
-
   const fetchLogs = useCallback(async () => {
     setLoading(true)
     try {
@@ -58,6 +46,18 @@ export default function ModerationLogsPage() {
       setLoading(false)
     }
   }, [page])
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin")
+    }
+  }, [status, router])
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchLogs()
+    }
+  }, [session, fetchLogs])
 
   const getActionIcon = (action: string) => {
     switch (action) {

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 // GET /api/users/[id]/activity - Get user activity (posts and comments)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -16,8 +16,8 @@ export async function GET(
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { id: params.id },
-          { username: params.id }
+          { id: (await params).id },
+          { username: (await params).id }
         ]
       },
       select: { id: true }

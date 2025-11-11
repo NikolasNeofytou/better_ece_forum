@@ -12,7 +12,7 @@ const updateReportSchema = z.object({
 // PATCH /api/reports/[id] - Update report status (moderator/admin only)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -42,7 +42,7 @@ export async function PATCH(
 
     // Get the report
     const report = await prisma.report.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         post: true,
         comment: true
@@ -58,7 +58,7 @@ export async function PATCH(
 
     // Update report status
     const updatedReport = await prisma.report.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         status: validatedData.status,
         resolvedAt: validatedData.status === "RESOLVED" || validatedData.status === "DISMISSED" 

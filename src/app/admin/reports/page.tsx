@@ -45,18 +45,6 @@ export default function ReportsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [processingId, setProcessingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin")
-    }
-  }, [status, router])
-
-  useEffect(() => {
-    if (session?.user) {
-      fetchReports()
-    }
-  }, [session, fetchReports])
-
   const fetchReports = useCallback(async () => {
     setLoading(true)
     try {
@@ -75,6 +63,18 @@ export default function ReportsPage() {
       setLoading(false)
     }
   }, [selectedStatus, page])
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin")
+    }
+  }, [status, router])
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchReports()
+    }
+  }, [session, fetchReports])
 
   const handleResolve = async (reportId: string, action: "RESOLVED" | "DISMISSED") => {
     setProcessingId(reportId)

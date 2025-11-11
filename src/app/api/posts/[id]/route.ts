@@ -15,11 +15,11 @@ const updatePostSchema = z.object({
 // GET /api/posts/[id] - Get a single post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const post = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         author: {
           select: {
@@ -92,7 +92,7 @@ export async function GET(
 
     // Increment view count
     await prisma.post.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         viewCount: {
           increment: 1
@@ -113,7 +113,7 @@ export async function GET(
 // PATCH /api/posts/[id] - Update a post
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -127,7 +127,7 @@ export async function PATCH(
 
     // Check if post exists and user is the author
     const existingPost = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { authorId: true }
     })
 
@@ -153,7 +153,7 @@ export async function PATCH(
     if (validatedData.tags !== undefined) {
       // Delete existing tags and create new ones
       await prisma.postTag.deleteMany({
-        where: { postId: params.id }
+        where: { postId: (await params).id }
       })
       
       if (validatedData.tags.length > 0) {
@@ -169,7 +169,7 @@ export async function PATCH(
 
     // Update post
     const post = await prisma.post.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         title: validatedData.title,
         content: validatedData.content,
@@ -217,7 +217,7 @@ export async function PATCH(
 // DELETE /api/posts/[id] - Delete a post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -231,7 +231,7 @@ export async function DELETE(
 
     // Check if post exists and user is the author or admin
     const existingPost = await prisma.post.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { 
         authorId: true 
       }
@@ -262,7 +262,7 @@ export async function DELETE(
 
     // Delete post (cascade will delete comments and tags)
     await prisma.post.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     return NextResponse.json({ success: true })

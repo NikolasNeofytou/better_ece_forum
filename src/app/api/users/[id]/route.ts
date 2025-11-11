@@ -4,15 +4,15 @@ import { prisma } from "@/lib/prisma"
 // GET /api/users/[id] - Get user profile
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Try to find user by username or id
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { id: params.id },
-          { username: params.id }
+          { id: (await params).id },
+          { username: (await params).id }
         ]
       },
       select: {

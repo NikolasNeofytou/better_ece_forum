@@ -11,7 +11,7 @@ const updateCommentSchema = z.object({
 // PATCH /api/comments/[id] - Update a comment
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -25,7 +25,7 @@ export async function PATCH(
 
     // Check if comment exists and user is the author
     const existingComment = await prisma.comment.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { authorId: true }
     })
 
@@ -48,7 +48,7 @@ export async function PATCH(
 
     // Update comment
     const comment = await prisma.comment.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         content: validatedData.content,
       },
@@ -91,7 +91,7 @@ export async function PATCH(
 // DELETE /api/comments/[id] - Delete a comment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -105,7 +105,7 @@ export async function DELETE(
 
     // Check if comment exists and user is the author or admin
     const existingComment = await prisma.comment.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { 
         authorId: true 
       }
@@ -136,7 +136,7 @@ export async function DELETE(
 
     // Delete comment (cascade will delete replies)
     await prisma.comment.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     return NextResponse.json({ success: true })

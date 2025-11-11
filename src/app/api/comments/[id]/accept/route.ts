@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 // POST /api/comments/[id]/accept - Mark comment as accepted answer
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,9 +17,11 @@ export async function POST(
       )
     }
 
+    const { id } = await params
+
     // Get the comment and its associated post
     const comment = await prisma.comment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         post: {
           select: {
@@ -66,7 +68,7 @@ export async function POST(
 
     // Mark this comment as accepted
     const updatedComment = await prisma.comment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isAccepted: true
       },
@@ -105,7 +107,7 @@ export async function POST(
 // DELETE /api/comments/[id]/accept - Unmark comment as accepted answer
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -117,9 +119,11 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
+
     // Get the comment and its associated post
     const comment = await prisma.comment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         post: {
           select: {
@@ -151,7 +155,7 @@ export async function DELETE(
 
     // Unmark as accepted
     await prisma.comment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isAccepted: false
       }
