@@ -25,7 +25,7 @@ async function main() {
   console.log('👥 Creating users...')
   const hashedPassword = await bcrypt.hash('password123', 10)
 
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: 'admin@ntua.gr',
       name: 'Admin User',
