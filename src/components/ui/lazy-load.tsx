@@ -1,6 +1,7 @@
 import { lazy, Suspense, ComponentType } from 'react'
 import { LoadingSpinner } from './loading-spinner'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyLoad<T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>,
   fallback?: React.ReactNode
@@ -24,17 +25,22 @@ export function lazyLoad<T extends ComponentType<any>>(
   }
 }
 
-// Image optimization helper
+// Image optimization helper - using standard img tag for compatibility
 export function OptimizedImage({
   src,
   alt,
   className,
   ...props
 }: React.ImgHTMLAttributes<HTMLImageElement>) {
+  if (!src) {
+    return null
+  }
+
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={src}
-      alt={alt}
+      src={src as string}
+      alt={alt || ''}
       loading="lazy"
       decoding="async"
       className={className}

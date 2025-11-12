@@ -16,11 +16,12 @@ export function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useThrottle<T extends (...args: any[]) => any>(
   callback: T,
   delay: number
 ): T {
-  const lastRun = useRef(Date.now())
+  const lastRun = useRef(0)
 
   return useCallback(
     (...args: Parameters<T>) => {

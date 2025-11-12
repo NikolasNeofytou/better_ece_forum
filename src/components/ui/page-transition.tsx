@@ -6,8 +6,15 @@ export function usePageTransition() {
   const pathname = usePathname()
 
   useEffect(() => {
+    // Mark as transitioning when pathname changes
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsTransitioning(true)
-    const timer = setTimeout(() => setIsTransitioning(false), 300)
+    
+    // Clear transition after animation completes
+    const timer = setTimeout(() => {
+      setIsTransitioning(false)
+    }, 300)
+    
     return () => clearTimeout(timer)
   }, [pathname])
 
