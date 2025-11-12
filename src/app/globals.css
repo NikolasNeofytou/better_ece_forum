@@ -94,6 +94,34 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+  
+  /* Mobile touch optimizations */
+  .touch-action-pan {
+    touch-action: pan-x pan-y;
+  }
+  
+  .touch-action-none {
+    touch-action: none;
+  }
+  
+  /* Better tap targets for mobile */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text selection on tap */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Smooth momentum scrolling for iOS */
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @keyframes fadeIn {
