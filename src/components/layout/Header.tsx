@@ -45,6 +45,12 @@ export function Header() {
               Posts
             </Link>
             <Link
+              href="/courses"
+              className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100"
+            >
+              Courses
+            </Link>
+            <Link
               href="/categories"
               className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100"
             >
