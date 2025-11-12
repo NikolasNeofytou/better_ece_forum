@@ -36,6 +36,7 @@ model User {
   reports       Report[]
   moderationLogs ModerationLog[]
   bans          Ban[]
+  courseResources CourseResource[]
 
   @@index([email])
   @@index([username])
@@ -289,6 +290,76 @@ model Ban {
   @@index([expiresAt])
 }
 
+// Course model for academic courses
+model Course {
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g., "ECE101"
+  name        String
+  description String?  @db.Text
+  semester    String?  // e.g., "Fall 2024"
+  year        Int?
+  instructor  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  resources   CourseResource[]
+  assignments Assignment[]
+
+  @@index([code])
+}
+
+// Course Resource model for notes, past papers, etc.
+model CourseResource {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  type        ResourceType
+  fileUrl     String?
+  content     String?  @db.Text
+  year        Int?
+  semester    String?
+  viewCount   Int      @default(0)
+  downloadCount Int    @default(0)
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Course relation
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Uploader relation
+  uploaderId  String
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([uploaderId])
+  @@index([type])
+  @@index([isApproved])
+}
+
+// Assignment model for course assignments
+model Assignment {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  instructions String? @db.Text
+  dueDate     DateTime?
+  maxPoints   Int?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Course relation
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([dueDate])
+  @@index([isPublished])
+}
+
 // Enums
 enum Role {
   USER
@@ -301,4 +372,14 @@ enum ReportStatus {
   REVIEWING
   RESOLVED
   DISMISSED
+}
+
+enum ResourceType {
+  NOTES
+  PAST_PAPER
+  SOLUTION
+  SLIDES
+  TEXTBOOK
+  REFERENCE
+  OTHER
 }

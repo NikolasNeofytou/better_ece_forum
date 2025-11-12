@@ -1,5 +1,4 @@
 // Service Worker for Better ECE Forum
-const CACHE_NAME = 'better-ece-forum-v1'
 const STATIC_CACHE = 'static-v1'
 const DYNAMIC_CACHE = 'dynamic-v1'
 

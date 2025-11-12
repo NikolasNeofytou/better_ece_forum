@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, PlusCircle, User, Menu } from 'lucide-react'
+import { Home, Search, User, Menu, BookOpen } from 'lucide-react'
 
 export function MobileNavigation() {
   const pathname = usePathname()
@@ -34,7 +34,7 @@ export function MobileNavigation() {
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/posts', icon: Menu, label: 'Posts' },
-    { href: '/posts/new', icon: PlusCircle, label: 'Create' },
+    { href: '/courses', icon: BookOpen, label: 'Courses' },
     { href: '/search', icon: Search, label: 'Search' },
     { href: '/users/me', icon: User, label: 'Profile' }
   ]
