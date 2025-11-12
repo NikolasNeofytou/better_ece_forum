@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { MessageSquare, Eye, TrendingUp, Search, Filter, X, Calendar } from "lucide-react"
+import { MessageSquare, Eye, TrendingUp, Search, Filter, X } from "lucide-react"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { getTextPreview } from "@/lib/sanitize/html"
 
 interface Author {
   id: string
@@ -77,6 +78,7 @@ export default function AdvancedSearchPage() {
     if (Object.keys(params).length > 0) {
       performSearch()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   const loadFilters = async () => {
@@ -328,7 +330,7 @@ export default function AdvancedSearchPage() {
                       {post.title}
                     </h3>
                     <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-3">
-                      {post.content.replace(/<[^>]*>/g, "").substring(0, 200)}...
+                      {getTextPreview(post.content, 200)}
                     </p>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500 dark:text-zinc-500">
                       <span className="flex items-center gap-1">
