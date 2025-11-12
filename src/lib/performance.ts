@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function reportWebVitals(metric: any) {
   // Log Web Vitals to console in development
   if (process.env.NODE_ENV === 'development') {
@@ -10,7 +11,9 @@ export function reportWebVitals(metric: any) {
     
     // Send to your analytics provider
     // Example with Google Analytics
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof window !== 'undefined' && (window as any).gtag) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(window as any).gtag('event', name, {
         event_category: 'Web Vitals',
         value: Math.round(name === 'CLS' ? value * 1000 : value),

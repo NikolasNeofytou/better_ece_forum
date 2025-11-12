@@ -3,7 +3,7 @@
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 
 export default function GlobalError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string }

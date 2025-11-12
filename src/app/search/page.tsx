@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { MessageSquare, Eye, TrendingUp, Search } from "lucide-react"
+import { stripHtml, truncateText } from "@/lib/sanitize/html"
 
 interface Author {
   id: string
@@ -126,13 +127,15 @@ export default function SearchPage() {
   }
 
   const getExcerpt = (html: string, maxLength: number = 200) => {
-    const text = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
+    const text = stripHtml(html)
+    return truncateText(text, maxLength)
   }
 
   const highlightText = (text: string, query: string) => {
     if (!query) return text
-    const regex = new RegExp(`(${query})`, "gi")
+    // Escape special regex characters
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    const regex = new RegExp(`(${escaped})`, "gi")
     return text.replace(regex, "<mark class='bg-yellow-200 dark:bg-yellow-900/50'>$1</mark>")
   }
 
