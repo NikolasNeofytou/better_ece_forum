@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Shield, Flag, FileText, Ban } from "lucide-react"
+import { Shield, Flag, FileText, Ban, BarChart3 } from "lucide-react"
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
@@ -117,7 +117,20 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link
+          href="/admin/analytics"
+          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+        >
+          <BarChart3 className="w-8 h-8 text-blue-500 mb-4" />
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+            Analytics
+          </h3>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            View insights, metrics, and trending content
+          </p>
+        </Link>
+
         <Link
           href="/admin/reports"
           className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
